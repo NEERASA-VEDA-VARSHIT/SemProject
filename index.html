@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookShelf - Your Personal Reading Journey</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="header-content">
+        <div class="logo">
+          <i data-lucide="book-open" class="logo-icon"></i>
+          <h1>BookShelf</h1>
+        </div>
+        <div class="header-actions">
+          <div class="streak-counter">
+            <i data-lucide="flame" class="streak-icon"></i>
+            <span id="streak-count">0</span>
+            <span>day streak</span>
+          </div>
+          <div class="theme-toggle">
+            <button id="theme-toggle" class="theme-button">
+              <i data-lucide="sun" class="theme-icon light-icon"></i>
+              <i data-lucide="moon" class="theme-icon dark-icon"></i>
+            </button>
+          </div>
+          <nav>
+            <button class="nav-button active" data-tab="search">
+              <i data-lucide="search"></i>
+              <span>Search</span>
+            </button>
+            <button class="nav-button" data-tab="library">
+              <i data-lucide="library"></i>
+              <span>Library</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Search Tab -->
+      <div id="search-tab" class="tab-content active">
+        <div class="search-container">
+          <form id="search-form" class="search-form">
+            <div class="search-input-wrapper">
+              <i data-lucide="search" class="search-icon"></i>
+              <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Search for books by title, author, or ISBN..."
+                required
+              >
+              <button type="submit" class="search-button">Search</button>
+            </div>
+          </form>
+        </div>
+        
+        <div id="featured-books" class="featured-section">
+          <h2>Featured Books</h2>
+          <div class="book-grid">
+            <!-- Featured books will be populated here -->
+          </div>
+        </div>
+
+        <div id="search-results" class="book-grid"></div>
+        <div id="loading" class="loading-spinner hidden"></div>
+      </div>
+
+      <!-- Library Tab -->
+      <div id="library-tab" class="tab-content">
+        <div class="streak-banner">
+          <div class="streak-info">
+            <i data-lucide="flame" class="streak-icon"></i>
+            <div class="streak-text">
+              <h3>Reading Streak</h3>
+              <p>Keep reading daily to maintain your streak!</p>
+            </div>
+          </div>
+          <div class="streak-progress">
+            <div class="days-grid">
+              <!-- Previous 7 days -->
+            </div>
+          </div>
+        </div>
+
+        <div id="reading-stats">
+          <!-- Reading statistics will be populated here -->
+        </div>
+
+        <div class="library-controls">
+          <div class="shelf-controls">
+            <button class="shelf-button active" data-shelf="all">
+              <i data-lucide="books"></i>
+              All Books
+            </button>
+            <button class="shelf-button" data-shelf="reading">
+              <i data-lucide="book-open"></i>
+              Reading
+            </button>
+            <button class="shelf-button" data-shelf="want-to-read">
+              <i data-lucide="bookmark"></i>
+              Want to Read
+            </button>
+            <button class="shelf-button" data-shelf="completed">
+              <i data-lucide="check-circle"></i>
+              Completed
+            </button>
+          </div>
+          
+          <div class="filter-controls">
+            <div class="filter-group">
+              <label for="status-filter">Status</label>
+              <select id="status-filter" class="filter-select">
+                <option value="all">All Status</option>
+                <option value="reading">Reading</option>
+                <option value="completed">Completed</option>
+                <option value="want-to-read">Want to Read</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="genre-filter">Genre</label>
+              <select id="genre-filter" class="filter-select">
+                <option value="all">All Genres</option>
+                <option value="fiction">Fiction</option>
+                <option value="non-fiction">Non-Fiction</option>
+                <option value="mystery">Mystery</option>
+                <option value="sci-fi">Science Fiction</option>
+                <option value="fantasy">Fantasy</option>
+                <option value="romance">Romance</option>
+                <option value="thriller">Thriller</option>
+                <option value="biography">Biography</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="sort-by">Sort By</label>
+              <select id="sort-by" class="filter-select">
+                <option value="date-added">Date Added</option>
+                <option value="title">Title</option>
+                <option value="author">Author</option>
+                <option value="progress">Reading Progress</option>
+                <option value="rating">Rating</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="library-books" class="book-grid"></div>
+        <div id="empty-library" class="empty-state hidden">
+          <i data-lucide="library" class="empty-icon"></i>
+          <h3>Your library is empty</h3>
+          <p>Start by searching for books to add to your collection</p>
+        </div>
+      </div>
+    </main>
+
+    <div id="notifications" class="notifications"></div>
+  </div>
+
+  <template id="book-card-template">
+    <div class="book-card">
+      <div class="book-cover">
+        <img src="" alt="" class="cover-image">
+        <div class="book-actions">
+          <button class="action-button add-button">
+            <i data-lucide="plus"></i>
+            Add to Library
+          </button>
+          <button class="action-button details-button">
+            <i data-lucide="info"></i>
+            View Details
+          </button>
+        </div>
+        <div class="progress-overlay hidden">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <span class="progress-text">0%</span>
+          <button class="mark-read-button">
+            <i data-lucide="book-open"></i>
+            Mark as Read Today
+          </button>
+        </div>
+      </div>
+      <div class="book-info">
+        <h3 class="book-title"></h3>
+        <p class="book-authors"></p>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
