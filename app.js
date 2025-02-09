@@ -1,6 +1,5 @@
-require(`dotenv`).config();
 // Constants
-const API_KEY = process.env.api_key;
+const API_KEY = AIzaSyD9JUUiPiAJRz6oGLzSRqssb-1yGfJRTDA;
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
 // Featured Books (Enhanced with more details)
