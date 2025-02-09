@@ -1,5 +1,5 @@
 // Constants
-const API_KEY = AIzaSyD9JUUiPiAJRz6oGLzSRqssb-1yGfJRTDA;
+const API_KEY = 'AIzaSyD9JUUiPiAJRz6oGLzSRqssb-1yGfJRTDA';
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
 // Featured Books (Enhanced with more details)
@@ -554,7 +554,7 @@ function initializeLucideIcons() {
   lucide.createIcons();
 }
 
-// Additional functions
+// Add missing functions
 function getLibrary() {
   return JSON.parse(localStorage.getItem('library')) || [];
 }
