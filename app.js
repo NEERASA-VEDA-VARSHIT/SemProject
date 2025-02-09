@@ -1,5 +1,5 @@
 // Constants
-const API_KEY = `{api_key}`;
+const API_KEY = process.env.api_key;
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
 // Featured Books (Enhanced with more details)
