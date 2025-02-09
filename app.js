@@ -1,3 +1,4 @@
+require(`dotenv`).config();
 // Constants
 const API_KEY = process.env.api_key;
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
