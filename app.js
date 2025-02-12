@@ -116,10 +116,16 @@ function filterLibrary() {
   const statusFilter = document.getElementById('status-filter').value;
   const genreFilter = document.getElementById('genre-filter').value;
   const sortBy = document.getElementById('sort-by').value;
+  const activeShelf = document.querySelector('.shelf-button.active').dataset.shelf;
   
   let library = getLibrary();
 
-  // Apply filters
+  // Apply shelf filter
+  if (activeShelf !== 'all') {
+    library = library.filter(book => book.status === activeShelf);
+  }
+
+  // Apply additional filters
   if (statusFilter !== 'all') {
     library = library.filter(book => book.status === statusFilter);
   }
@@ -419,13 +425,13 @@ function setupLibraryBookCard(card, book) {
   progressFill.style.width = `${book.progress}%`;
   progressText.textContent = `${book.progress}%`;
 
-  // Add reading status badge
+  // Add status badge
   const statusBadge = document.createElement('div');
   statusBadge.className = `status-badge ${book.status}`;
   statusBadge.textContent = book.status.replace('-', ' ');
   card.querySelector('.book-cover').appendChild(statusBadge);
 
-  // Add mark as read button with page count
+  // Add mark as read button
   const markReadButton = card.querySelector('.mark-read-button');
   markReadButton.innerHTML = `
     <i data-lucide="book-open"></i>
@@ -435,6 +441,13 @@ function setupLibraryBookCard(card, book) {
   markReadButton.addEventListener('click', () => {
     const newProgress = Math.min(book.progress + 10, 100);
     updateBookProgress(book.id, newProgress);
+  });
+
+  // Add click event to open book details
+  card.addEventListener('click', (e) => {
+    if (!e.target.closest('.mark-read-button')) {
+      openBook(book.id);
+    }
   });
 
   // Add reading stats if available
@@ -480,7 +493,12 @@ function setupSearchBookCard(card, book) {
 }
 
 // New Feature: Book Details Modal
-function showBookDetails(book) {
+function openBook(bookId) {
+  const library = getLibrary();
+  const book = library.find(b => b.id === bookId);
+  
+  if (!book) return;
+
   const modal = document.createElement('div');
   modal.className = 'book-modal';
   modal.innerHTML = `
@@ -493,27 +511,60 @@ function showBookDetails(book) {
         <div class="modal-title">
           <h2>${book.title}</h2>
           <p class="modal-authors">${book.authors.join(', ')}</p>
-          <div class="modal-badges">
-            ${book.categories.map(category => `<span class="category-badge">${category}</span>`).join('')}
+          <div class="reading-progress">
+            <h3>Reading Progress: ${book.progress}%</h3>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${book.progress}%"></div>
+            </div>
+          </div>
+          <div class="reading-actions">
+            <button class="action-button mark-read-button">
+              <i data-lucide="book-open"></i>
+              Read ${Math.min(10, book.pageCount || 10)} pages
+            </button>
+            <select class="status-select">
+              <option value="want-to-read" ${book.status === 'want-to-read' ? 'selected' : ''}>Want to Read</option>
+              <option value="reading" ${book.status === 'reading' ? 'selected' : ''}>Currently Reading</option>
+              <option value="completed" ${book.status === 'completed' ? 'selected' : ''}>Completed</option>
+            </select>
           </div>
         </div>
       </div>
       <div class="modal-body">
-        <p class="description">${book.description}</p>
         <div class="book-metadata">
-          ${book.pageCount ? `<div class="metadata-item">
-            <i data-lucide="book-open"></i>
-            <span>${book.pageCount} pages</span>
-          </div>` : ''}
-          ${book.publishedDate ? `<div class="metadata-item">
-            <i data-lucide="calendar"></i>
-            <span>${new Date(book.publishedDate).toLocaleDateString()}</span>
-          </div>` : ''}
-          ${book.averageRating ? `<div class="metadata-item">
-            <i data-lucide="star"></i>
-            <span>${book.averageRating.toFixed(1)} / 5</span>
-          </div>` : ''}
+          ${book.pageCount ? `
+            <div class="metadata-item">
+              <i data-lucide="book-open"></i>
+              <span>${book.pageCount} pages</span>
+            </div>
+          ` : ''}
+          ${book.publishedDate ? `
+            <div class="metadata-item">
+              <i data-lucide="calendar"></i>
+              <span>${new Date(book.publishedDate).toLocaleDateString()}</span>
+            </div>
+          ` : ''}
+          ${book.averageRating ? `
+            <div class="metadata-item">
+              <i data-lucide="star"></i>
+              <span>${book.averageRating.toFixed(1)} / 5</span>
+            </div>
+          ` : ''}
         </div>
+        <div class="book-description">
+          <h3>Description</h3>
+          <p>${book.description || 'No description available.'}</p>
+        </div>
+        ${book.categories?.length ? `
+          <div class="book-categories">
+            <h3>Categories</h3>
+            <div class="category-badges">
+              ${book.categories.map(category => `
+                <span class="category-badge">${category}</span>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
     </div>
   `;
@@ -521,7 +572,18 @@ function showBookDetails(book) {
   document.body.appendChild(modal);
   initializeLucideIcons();
 
+  // Add event listeners
   modal.querySelector('.close-button').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  modal.querySelector('.mark-read-button').addEventListener('click', () => {
+    updateBookProgress(book.id, Math.min(book.progress + 10, 100));
+    modal.remove();
+  });
+
+  modal.querySelector('.status-select').addEventListener('change', (e) => {
+    updateBookStatus(book.id, e.target.value);
     modal.remove();
   });
 
@@ -530,6 +592,28 @@ function showBookDetails(book) {
       modal.remove();
     }
   });
+}
+
+// Add this new function to update book status
+function updateBookStatus(bookId, newStatus) {
+  const library = getLibrary();
+  const bookIndex = library.findIndex(book => book.id === bookId);
+  
+  if (bookIndex !== -1) {
+    const book = library[bookIndex];
+    book.status = newStatus;
+    
+    if (newStatus === 'reading' && !book.startDate) {
+      book.startDate = new Date().toISOString();
+    } else if (newStatus === 'completed' && !book.completionDate) {
+      book.completionDate = new Date().toISOString();
+      book.progress = 100;
+      showNotification('🎉 Congratulations on finishing the book!', 'success');
+    }
+    
+    localStorage.setItem('library', JSON.stringify(library));
+    renderLibrary();
+  }
 }
 
 // Utility Functions
