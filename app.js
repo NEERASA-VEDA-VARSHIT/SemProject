@@ -1,5 +1,5 @@
 // Constants
-const API_KEY = 'AIzaSyD9JUUiPiAJRz6oGLzSRqssb-1yGfJRTDA';
+const API_KEY = 'your api key';
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
 // Featured Books (Enhanced with more details)
